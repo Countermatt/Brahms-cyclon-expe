@@ -483,11 +483,15 @@ else if(params[0].compare("lancement") == 0){
     }
 
     k = 0;
+
     while(k<nbNode){
+      /*
       if (waitpid(childtab[k], &wstatus, WUNTRACED | WCONTINUED) == -1) {
           perror("waitpid");
           exit(EXIT_FAILURE);
       }
+      */
+      wait();
       k++;
     }
 
