@@ -139,6 +139,37 @@ int Brahms::Pull_Reply(char** ans,
   return 0;
 }
 
+int Brahms::Pull_Reply_Byz(char** ans,
+               unsigned int* ansSize,
+               Data* data)
+{
+
+  auto View = data->GlobalView();
+  auto myIP = data->MyIP();
+
+  std::string reqIP;
+  reqIP.append(data->Identifiant());
+  reqIP.append(";");
+  reqIP.append("PullReply");
+  reqIP.append(";");
+
+  int viewsize = View.size();
+  for(int i = 0; i < viewsize; i++){
+      reqIP.append(myIP);
+      reqIP.append(",");
+
+  }
+
+
+  reqIP.append(myIP);
+
+  *ansSize = reqIP.size();
+  *ans = new char[*ansSize];
+  reqIP.copy(*ans, *ansSize);
+
+  return 0;
+}
+
 int Brahms::Pull_Receive_Reply(std::string ans,
                                Data* data)
 {

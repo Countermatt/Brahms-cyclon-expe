@@ -29,14 +29,14 @@ RPS::RPS(int rpsTcpPort, std::string bootstrapIP, int nb_turn, int rps_period,
     : mListener(make_shared<TCPListener>(rpsTcpPort)),
     mRpsTcpPort(rpsTcpPort), mPushReqCnt(0), mPullReqCnt(0),
     mPingReqCnt(0), mData(), mBrahms(), mNbTurn(nb_turn),
-    mRPSPeriod(rps_period), mSGX(sgx), mterminated(1), mByzantin(byzantin)
+    mRPSPeriod(rps_period), mSGX(sgx), mterminated(1), mByzantin(byzantin), mByzAttack(0)
 {
   mDataPath = path;
   stringstream ss;
   mBrahms.SetAL1(al);
   mBrahms.SetBL2(bl);
   mBrahms.SetGL3(gl);
-  mBrahms.SetSamplerSize(samplersize*3);
+  mBrahms.SetSamplerSize(samplersize);
   std::vector<std::string> btstIP;
   splitString(btstIP, bootstrapIP, ',');
 
@@ -89,7 +89,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
 
 
   while(tour < mNbTurn){
-    ss << RED << "SendingThread tour: " << tour << RESET << endl;
+    ss << RED << "SendingThread tour: " << tour <<" sur "<< mNbTurn << RESET << endl;
     //Reset view
 
     if(al1 != 0){
@@ -149,6 +149,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
 
   std::this_thread::sleep_for(std::chrono::milliseconds(1000 * mRPSPeriod));
   tour++;
+  mByzAttack = 0;
 }
   ss << RED << "SendingThread Terminated" << RESET << endl;
 
@@ -530,7 +531,12 @@ void RPS::ReceiveRequest(shared_ptr<TCPConnection> conn)
 
   //Pull Reply
     case 1:
-      res = mBrahms.Pull_Reply(&ans, &ansSize, &mData);
+      if((mByzAttack == 0) && (mByzantin == 0)){
+        res = mBrahms.Pull_Reply_Byz(&ans, &ansSize, &mData);
+      }
+      else{
+        res = mBrahms.Pull_Reply(&ans, &ansSize, &mData);
+      }
       if (req != nullptr) delete[] req;
 
       if (res != 0) {

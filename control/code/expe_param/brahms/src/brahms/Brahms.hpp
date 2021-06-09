@@ -45,6 +45,11 @@ class Brahms {
                    unsigned int* ansSize,
                    Data* data);
 
+    int Pull_Reply_Byz(char** ans,
+                   unsigned int* ansSize,
+                   Data* data);
+
+
     int Pull_Receive_Reply(std::string ans, Data* data);
 
     int Pull_Init_Request(char** req,

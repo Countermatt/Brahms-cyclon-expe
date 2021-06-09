@@ -62,6 +62,7 @@ private:
   int mSGX;
   int mterminated;
   int mByzantin;
+  int mByzAttack;
   std::string mDataPath;
 };
 
