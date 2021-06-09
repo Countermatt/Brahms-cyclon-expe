@@ -447,6 +447,7 @@ for(int i = 0; i< nbNode; i++){
 }
 else if(params[0].compare("lancement") == 0){
     //lancement de l'expérience
+    pid_t childtab1[nbNode];
     std::vector<std::string> conn_info_temp;
     string conn_info;
     char * temp_conn = nullptr;
@@ -477,7 +478,7 @@ else if(params[0].compare("lancement") == 0){
 
       int wstatus;
 
-      childtab[i] = spawnChild("ssh", args);
+      childtab1[i] = spawnChild("ssh", args);
 
 
     }
