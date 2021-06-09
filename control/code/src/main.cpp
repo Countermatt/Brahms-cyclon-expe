@@ -233,7 +233,7 @@ int main(int argc, char** argv) {
     i++;
     h++;
   }
-if(params[0].compare("0")){
+if(params[0].compare("0") == 0){
   //création des fichiers de config
   cout << RED << "Création des fichiers de configuration des nodes" << "\n" << RESET << endl;
   std::string nodeFile;
@@ -445,7 +445,7 @@ for(int i = 0; i< nbNode; i++){
       }
     }
 }
-if(params[0].compare("1")){
+if(params[0].compare("1") == 0){
     //lancement de l'expérience
     std::vector<std::string> conn_info_temp;
     string conn_info;
@@ -556,7 +556,7 @@ if(params[0].compare("1")){
       }
     }
 }
-if(params[0].compare("2")){
+if(params[0].compare("2") == 0){
   std::vector<std::string> conn_info_temp;
   string conn_info;
   char * temp_conn = nullptr;
