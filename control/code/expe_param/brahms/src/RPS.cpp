@@ -114,7 +114,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   fstream file;
   file.open(mDataPath ,ios::out | ios::app);
   string message;
-for(int k = 0; k < (int) mData.GlobalView().size(); k++){
+  for(int k = 0; k < (int) mData.GlobalView().size(); k++){
     file << mData.GlobalView()[k];
     if(k < (int) mData.GlobalView().size() - 1){
       file << ";";
@@ -176,7 +176,7 @@ void RPS::pushRequest()
   res = mBrahms.Push_Request(&req, &reqSize, &destIP, &destIPSize, &destPort, &mData);
 
   if (res != 0) {
-    ss << "Error creating Push_REQ " << endl;
+    ss << "Error creating Push-brahms_REQ " << endl;
     LOG(ss.str().c_str());
     return;
   }
@@ -197,7 +197,7 @@ void RPS::pushRequest()
   try {
     conn->Write(req, reqSize);
   } catch (exception& e) {
-    ss << "Error sending Push_REQ " << endl;
+    ss << "Error sending Push-brahms_REQ " << endl;
     LOG(ss.str().c_str());
     if (req != nullptr) delete[] req;
     return;
@@ -224,7 +224,7 @@ void RPS::initPullRequest()
   res = mBrahms.Pull_Init_Request(&req, &reqSize, &destIP, &destIPSize, &destPort, &mData);
 
   if (res != 0) {
-    ss << "Error creating Pull_REQ" << endl;
+    ss << "Error creating Pull-brahms_REQ" << endl;
     LOG(ss.str().c_str());
     return;
   }
@@ -247,7 +247,7 @@ void RPS::initPullRequest()
   try {
     conn->Write(req, reqSize);
   } catch (exception& e) {
-    ss << "Error sending Pull_REQ " << endl;
+    ss << "Error sending Pull-init_REQ " << endl;
     LOG(ss.str().c_str());
     if (req != nullptr) delete[] req;
     return;
@@ -259,7 +259,7 @@ void RPS::initPullRequest()
     try {
       conn->Read(&ans, &ansSize);
     } catch (exception &e) {
-      ss << " Error receiving Pull_ANS " << endl;
+      ss << " Error receiving Pull-init_ANS " << endl;
       LOG(ss.str().c_str());
       conn->Close();
       if (req != nullptr) delete[] req;
@@ -295,7 +295,7 @@ void RPS::initPullRequest()
       try {
         connCyclon->Write(reqCyclon, reqCyclonSize);
       } catch (exception& e) {
-        ss << "Error sending Pull_REQ " << endl;
+        ss << "Error sending Pull-cyclon_REQ " << endl;
         LOG(ss.str().c_str());
         if (reqCyclon != nullptr) delete[] reqCyclon;
         return;
@@ -312,7 +312,7 @@ void RPS::initPullRequest()
       try {
         connCyclon->Read(&ansCyclon, &ansCyclonSize);
       } catch (exception &e) {
-        ss << " Error receiving Pull_ANS " << endl;
+        ss << " Error receiving Pull-cyclon_ANS " << endl;
         LOG(ss.str().c_str());
         connCyclon->Close();
         if (reqCyclon != nullptr) delete[] reqCyclon;
@@ -324,7 +324,7 @@ void RPS::initPullRequest()
       splitString(requestcyclon, ansCyclon, ansCyclonSize, ';');
       res = mBrahms.Cyclon_Pull_Receive_Reply(requestcyclon[2], &mData);
       if (res != 0) {
-        ss << "Error handling Pull_ANS " << endl;
+        ss << "Error handling Pull-cyclon_ANS " << endl;
         LOG(ss.str().c_str());
         if (ansCyclon != nullptr) delete[] ansCyclon;
         if (req != nullptr) delete[] req;
@@ -356,7 +356,7 @@ void RPS::initPullRequest()
       try {
         connBrahms->Write(reqBrahms, reqBrahmsSize);
       } catch (exception& e) {
-        ss << "Error sending Pull_REQ " << endl;
+        ss << "Error sending Pull-brahms_REQ " << endl;
         LOG(ss.str().c_str());
         if (reqBrahms != nullptr) delete[] reqBrahms;
         return;
@@ -369,7 +369,7 @@ void RPS::initPullRequest()
       try {
         connBrahms->Read(&ansBrahms, &ansBrahmsSize);
       } catch (exception &e) {
-        ss << " Error receiving Pull_ANS " << endl;
+        ss << " Error receiving Pull-brahms_ANS " << endl;
         LOG(ss.str().c_str());
         connBrahms->Close();
         if (reqBrahms != nullptr) delete[] reqBrahms;
