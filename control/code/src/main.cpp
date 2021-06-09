@@ -486,7 +486,7 @@ else if(params[0].compare("lancement") == 0){
     k = 0;
 
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000)*60);
+    std::this_thread::sleep_for(std::chrono::milliseconds(1010)*nbTurn*rpsPeriod);
 
     while(k<nbNode){
       cout << GRN << k << "\n" << RESET << endl;
