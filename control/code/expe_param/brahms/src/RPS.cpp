@@ -70,22 +70,16 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   int tour = 0;
   int samplersize = mBrahms.SamplerSize();
 
-  fstream file;
-  file.open(mDataPath ,ios::out | ios::app);
-  if (!file) {
-  		cout << "No such file";
-  }
-  else{
     string message;
+    message.clear();
     for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-      file << mData.GlobalView()[k];
+      message << mData.GlobalView()[k];
       if(k < (int) mData.GlobalView().size() - 1){
-        file << ",";
+        message << ",";
       }
     }
-    file << "\n";
-    file.close();
-  }
+    message << "\n";
+    message.close();
 
 
   while(tour < mNbTurn){
@@ -118,30 +112,13 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   mBrahms.MergeView(al1, bl2, gl3, &mData);
 
   //write globalview to data.csv
-  file.open(mDataPath ,ios::out | ios::app);
-  if (!file) {
-  		cout << "No such file";
-  }
-  else{
-    string message;
     for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-      file << mData.GlobalView()[k];
+      message << mData.GlobalView()[k];
       if(k < (int) mData.GlobalView().size() - 1){
-        file << ",";
+        message << ",";
       }
     }
-    file << ";";
-    file.close();
-  }
-  string message;
-  for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-    file << mData.GlobalView()[k];
-    if(k < (int) mData.GlobalView().size() - 1){
-      file << ",";
-    }
-  }
-  file << "\n";
-  file.close();
+    message << "\n";
 
   mData.PullReset();
   mData.PushReset();
@@ -150,6 +127,15 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   std::this_thread::sleep_for(std::chrono::milliseconds(1000 * mRPSPeriod));
   tour++;
   mByzAttack = 0;
+}
+
+file.open(mDataPath ,ios::out | ios::app);
+if (!file) {
+    cout << "No such file";
+}
+else{
+  file << message;
+  file.close();
 }
   ss << RED << "SendingThread Terminated" << RESET << endl;
 
