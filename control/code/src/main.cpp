@@ -444,6 +444,30 @@ for(int i = 0; i< nbNode; i++){
           exit(EXIT_FAILURE);
       }
     }
+
+    std::string tempResult;
+    for(int i = 0; i <  sgxNodeList.size(); i++){
+      tempResult.append(sgxNodeList[i]);
+      tempResult.append(";");
+    }
+    tempResult.append("\n");
+
+   for(int i = 0; i <  byzNodeList.size(); i++){
+     tempResult.append(byzNodeList[i]);
+     if(i < byzNodeList.size()-1){
+       tempResult.append(";");
+     }
+   }
+
+   file.open("NodeList.csv", ios::out);
+   if (!file) {
+     cout << "File not created!";
+     exit(EXIT_FAILURE);
+   }
+   else {
+     file << tempResult;
+     file.close();
+   }
 }
 else if(params[0].compare("lancement") == 0){
     //lancement de l'expérience
@@ -512,31 +536,7 @@ else if(params[0].compare("lancement") == 0){
        exit(EXIT_FAILURE);
    }
 
-/*
-   std::string tempResult;
-   for(int i = 0; i <  sgxNodeList.size(); i++){
-     tempResult.append(sgxNodeList[i]);
-     tempResult.append(";");
-   }
-   tempResult.append("\n");
 
-  for(int i = 0; i <  byzNodeList.size(); i++){
-    tempResult.append(byzNodeList[i]);
-    if(i < byzNodeList.size()-1){
-      tempResult.append(";");
-    }
-  }
-
-  file.open("Result/NodeList.csv", ios::out);
-  if (!file) {
-    cout << "File not created!";
-    exit(EXIT_FAILURE);
-  }
-  else {
-    file << tempResult;
-    file.close();
-  }
-*/
     temp_conn = nullptr;
     for(int i = 0; i< nbNode; i++){
       conn_info.clear();
