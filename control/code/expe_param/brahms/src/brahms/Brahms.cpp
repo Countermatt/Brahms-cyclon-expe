@@ -324,22 +324,25 @@ void Brahms::MergeView(int aL1,
   auto sampleView = data->SamplerView();
 
   data->GlobalReset();
-
+  int i =0;
   if(pushView.size() != 0){
-    for(int i = 0; i < aL1; i++){
+    while( i < aL1){
       data->GlobalAdd(data->RandomElement(pushView));
+      i++;
     }
   }
-
+  i = 0;
   if(pullView.size() != 0){
-    for(int i = 0; i < bL2; i++){
+    while( i < bL2){
       data->GlobalAdd(data->RandomElement(pullView));
+      i++;
     }
   }
-
+  i = 0;
   if(sampleView.size() != 0){
-    for(int i = 0; i < gL3; i++){
+    while( i < gL3){
       data->GlobalAdd(data->RandomElement(sampleView));
+      i++;
     }
   }
 }
