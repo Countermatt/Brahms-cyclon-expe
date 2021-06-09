@@ -47,8 +47,6 @@ RPS::RPS(int rpsTcpPort, std::string bootstrapIP, int nb_turn, int rps_period,
     mData.GlobalAdd(btstIP[i]);
   }
 
-
-
   mListenerThread = thread(&RPS::listeningThread, this);
   std::this_thread::sleep_for(std::chrono::milliseconds(1000 * mRPSPeriod));
   mSenderThread = thread(&RPS::sendingThread, this);
@@ -69,6 +67,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
 
   int tour = 0;
   int samplersize = mBrahms.SamplerSize();
+    fstream file;
 
     string message;
     message.clear();
@@ -111,6 +110,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   mBrahms.MergeView(al1, bl2, gl3, &mData);
 
   //write globalview to data.csv
+    message.clear();
     for(int k = 0; k < (int) mData.GlobalView().size(); k++){
       message.append(mData.GlobalView()[k]);
       if(k < (int) mData.GlobalView().size() - 1){
@@ -119,6 +119,15 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
     }
     message.append("\n");
 
+    file.open(mDataPath ,ios::out | ios::app);
+    if (!file) {
+        cout << "No such file";
+    }
+    else{
+      file << message;
+      file.close();
+    }
+
   mData.PullReset();
   mData.PushReset();
   mData.StreamReset();
@@ -126,16 +135,6 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   std::this_thread::sleep_for(std::chrono::milliseconds(1000 * mRPSPeriod));
   tour++;
   mByzAttack = 0;
-}
-  fstream file;
-
-file.open(mDataPath ,ios::out | ios::app);
-if (!file) {
-    cout << "No such file";
-}
-else{
-  file << message;
-  file.close();
 }
   ss << RED << "SendingThread Terminated" << RESET << endl;
 
