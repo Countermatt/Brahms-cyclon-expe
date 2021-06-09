@@ -491,7 +491,7 @@ else if(params[0].compare("lancement") == 0){
           exit(EXIT_FAILURE);
       }
 
-      wait();
+      //wait();
       k++;
     }
 
