@@ -83,7 +83,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
         file << ",";
       }
     }
-    file << ";";
+    file << "\n";
     file.close();
   }
 
@@ -140,7 +140,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
       file << ",";
     }
   }
-  file << ";";
+  file << "\n";
   file.close();
 
   mData.PullReset();
