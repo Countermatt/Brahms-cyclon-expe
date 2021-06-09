@@ -39,8 +39,14 @@ extern "C" pid_t spawnChild(const char* program,  char* const* arg_list)
     }
 }
 
-int main(void) {
+int main(int argc, char** argv) {
 
+  std::vector<std::string> params;
+    for (int i = 1; i < argc; i++)
+    {
+        params.push_back(argv[i]);
+
+    }
 
     int k = 0;
 //Récupération conf de l'expérience----------------------------------------------------
@@ -227,7 +233,7 @@ int main(void) {
     i++;
     h++;
   }
-
+if(params[0].compare("0")){
   //création des fichiers de config
   cout << RED << "Création des fichiers de configuration des nodes" << "\n" << RESET << endl;
   std::string nodeFile;
@@ -397,17 +403,12 @@ for(int i = 0; i< nbNode; i++){
 
       int wstatus;
 
-      childtab[i] = spawnChild("scp", args);
+      child = spawnChild("scp", args);
 
-    }
-
-    k = 0;
-    while(k<nbNode){
-      if (waitpid(childtab[k], &wstatus, WUNTRACED | WCONTINUED) == -1) {
+      if (waitpid(child, &wstatus, WUNTRACED | WCONTINUED) == -1) {
           perror("waitpid");
           exit(EXIT_FAILURE);
       }
-      k++;
     }
 
     //compilation du fichier
@@ -436,21 +437,19 @@ for(int i = 0; i< nbNode; i++){
 
       int wstatus;
 
-      childtab[i] = spawnChild("ssh", args);
+      child = spawnChild("ssh", args);
 
-
-    }
-
-    k = 0;
-    while(k<nbNode){
-      if (waitpid(childtab[k], &wstatus, WUNTRACED | WCONTINUED) == -1) {
+      if (waitpid(child, &wstatus, WUNTRACED | WCONTINUED) == -1) {
           perror("waitpid");
           exit(EXIT_FAILURE);
       }
-      k++;
     }
-
+}
+if(params[0].compare("1")){
     //lancement de l'expérience
+    std::vector<std::string> conn_info_temp;
+    string conn_info;
+    char * temp_conn = nullptr;
     cout << RED << "Lancement de l'expérience" << "\n" << RESET << endl;
     for(int i = 0; i< nbNode; i++){
       conn_info_temp.clear();
@@ -504,7 +503,7 @@ for(int i = 0; i< nbNode; i++){
        exit(EXIT_FAILURE);
    }
 
-
+/*
    std::string tempResult;
    for(int i = 0; i <  sgxNodeList.size(); i++){
      tempResult.append(sgxNodeList[i]);
@@ -528,7 +527,7 @@ for(int i = 0; i< nbNode; i++){
     file << tempResult;
     file.close();
   }
-
+*/
     temp_conn = nullptr;
     for(int i = 0; i< nbNode; i++){
       conn_info.clear();
@@ -556,7 +555,11 @@ for(int i = 0; i< nbNode; i++){
           exit(EXIT_FAILURE);
       }
     }
-
+}
+if(params[0].compare("2")){
+  std::vector<std::string> conn_info_temp;
+  string conn_info;
+  char * temp_conn = nullptr;
     //supression des fichiers sur les machines distantes
     cout << RED << "Suprésion des dossiers sur les machines distantes" << "\n" << RESET << endl;
     for(int i = 0; i< nbNode; i++){
@@ -596,5 +599,6 @@ for(int i = 0; i< nbNode; i++){
         perror("waitpid");
         exit(EXIT_FAILURE);
     }
+}
     exit(EXIT_SUCCESS);
 }
