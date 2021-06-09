@@ -78,13 +78,13 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
       }
     }
     message.append("\n");
-    
+
     file.open(mDataPath ,ios::app);
     if (!file) {
         cout << "No such file";
     }
     else{
-      file << message;
+      file << message << endl;
       file.close();
     }
 
@@ -126,13 +126,13 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
       }
     }
     message.append("\n");
-
     file.open(mDataPath ,ios::app);
     if (!file) {
         cout << "No such file";
     }
     else{
-      file << message;
+      file << message<< endl;;
+      file << "\n";
       file.close();
     }
 
