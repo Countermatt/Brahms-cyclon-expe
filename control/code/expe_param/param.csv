@@ -1,0 +1,1 @@
+nb noeuds:5;liste machine séparer avec des ,:10.0.0.5,10.0.0.6,10.0.0.7,10.0.0.8,10.0.0.9,10.0.0.10;% noeud sgx:0;% noeud byzantins:0;période rps:5;nb tour:100;taille vue:10;alpha brahms:0.2;beta brahms:0.2;gamma brahms:0.6;taille cyclon:5;taille sampler:10
