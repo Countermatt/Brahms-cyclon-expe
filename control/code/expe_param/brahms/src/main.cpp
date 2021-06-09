@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
   path = getcwd(str,1024);
   //creation du chemin vers le dossier data
   std::string path_data_string(path);
-  path_string.append("/");
+  path_data_string.append("/");
   path_data_string.append(params[0]);
   path_data_string.append("/data/data.csv");
 
