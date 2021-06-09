@@ -74,7 +74,6 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   file.open(mDataPath ,ios::out | ios::app);
   if (!file) {
   		cout << "No such file";
-      return EXIT_SUCCESS;
   }
   else{
     string message;
@@ -122,7 +121,6 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   file.open(mDataPath ,ios::out | ios::app);
   if (!file) {
   		cout << "No such file";
-      return EXIT_SUCCESS;
   }
   else{
     string message;
