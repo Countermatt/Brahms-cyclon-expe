@@ -27,7 +27,7 @@ void Brahms::SetGL3(int gl3)
   mGL3 = gl3;
 }
 
-void SetSamplerSize(int samplersize)
+void Brahms::SetSamplerSize(int samplersize)
 {
   mSamplerSize = samplersize;
 }
