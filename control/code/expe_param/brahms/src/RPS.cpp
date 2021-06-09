@@ -69,22 +69,12 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   int samplersize = mBrahms.SamplerSize();
     fstream file;
 
-    string message;
-    message.clear();
-    for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-      message.append(mData.GlobalView()[k]);
-      if(k < (int) mData.GlobalView().size() - 1){
-        message.append(",");
-      }
-    }
-    message.append("\n");
-
-    file.open(mDataPath ,ios::app);
+    file.open(mDataPath ,ios::out | ios::app);
     if (!file) {
         cout << "No such file";
     }
     else{
-      file << message << endl;
+      file << mData.GlobalPrint() << endl;
       file.close();
     }
 
@@ -118,23 +108,14 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   mBrahms.MergeView(al1, bl2, gl3, &mData);
 
   //write globalview to data.csv
-    message.clear();
-    for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-      message.append(mData.GlobalView()[k]);
-      if(k < (int) mData.GlobalView().size() - 1){
-        message.append(",");
+      file.open(mDataPath ,ios::out | ios::app);
+      if (!file) {
+          cout << "No such file";
       }
-    }
-    message.append("\n");
-    file.open(mDataPath ,ios::app);
-    if (!file) {
-        cout << "No such file";
-    }
-    else{
-      file << message<< endl;;
-      file << "\n";
-      file.close();
-    }
+      else{
+        file << mData.GlobalPrint() << endl;
+        file.close();
+      }
 
   mData.PullReset();
   mData.PushReset();
