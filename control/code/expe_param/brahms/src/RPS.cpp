@@ -73,13 +73,12 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
     string message;
     message.clear();
     for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-      message << mData.GlobalView()[k];
+      message.append(mData.GlobalView()[k]);
       if(k < (int) mData.GlobalView().size() - 1){
-        message << ",";
+        message.append(",");
       }
     }
-    message << "\n";
-    message.close();
+    message.append("\n");
 
 
   while(tour < mNbTurn){
@@ -113,12 +112,12 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
 
   //write globalview to data.csv
     for(int k = 0; k < (int) mData.GlobalView().size(); k++){
-      message << mData.GlobalView()[k];
+      message.append(mData.GlobalView()[k]);
       if(k < (int) mData.GlobalView().size() - 1){
-        message << ",";
+        message.append(",");
       }
     }
-    message << "\n";
+    message.append("\n");
 
   mData.PullReset();
   mData.PushReset();
@@ -128,6 +127,7 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   tour++;
   mByzAttack = 0;
 }
+  fstream file;
 
 file.open(mDataPath ,ios::out | ios::app);
 if (!file) {
