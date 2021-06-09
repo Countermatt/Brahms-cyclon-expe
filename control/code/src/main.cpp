@@ -42,6 +42,7 @@ extern "C" pid_t spawnChild(const char* program,  char* const* arg_list)
 int main(void) {
 
 
+    int k = 0;
 //Récupération conf de l'expérience----------------------------------------------------
 
     std::vector<std::string> expe_param;
@@ -131,7 +132,7 @@ int main(void) {
     int samplerSize = std::stoi(temp_param[1]);
 
 
-
+    pid_t childtab[nbNode];
 //Préparation conf des machines distantes---------------------------------------------------------
   //création des dossiers de conf dess
   cout << RED << "Créationdu dossier pour la configuration des nodes" << "\n" << RESET << endl;
@@ -394,15 +395,19 @@ for(int i = 0; i< nbNode; i++){
 
       char * const args[] = { "scp", "-i", "expe_param/key/id_rsa", "-r", temp, temp_conn, NULL };
 
-      pid_t child;
       int wstatus;
 
-      child = spawnChild("scp", args);
+      childtab[i] = spawnChild("scp", args);
 
-      if (waitpid(child, &wstatus, WUNTRACED | WCONTINUED) == -1) {
+    }
+
+    k = 0;
+    while(k<nbNode){
+      if (waitpid(childtab[k], &wstatus, WUNTRACED | WCONTINUED) == -1) {
           perror("waitpid");
           exit(EXIT_FAILURE);
       }
+      k++;
     }
 
     //compilation du fichier
@@ -429,21 +434,24 @@ for(int i = 0; i< nbNode; i++){
       char * const args[] = { "ssh", temp_conn, "-i", "expe_param/key/id_rsa", "-l", "ubuntu", "make", "-C", path, NULL };
 
 
-      pid_t child;
       int wstatus;
 
-      child = spawnChild("ssh", args);
+      childtab[i] = spawnChild("ssh", args);
 
-      if (waitpid(child, &wstatus, WUNTRACED | WCONTINUED) == -1) {
+
+    }
+
+    k = 0;
+    while(k<nbNode){
+      if (waitpid(childtab[k], &wstatus, WUNTRACED | WCONTINUED) == -1) {
           perror("waitpid");
           exit(EXIT_FAILURE);
       }
-
+      k++;
     }
 
     //lancement de l'expérience
     cout << RED << "Lancement de l'expérience" << "\n" << RESET << endl;
-    pid_t childtab[nbNode];
     for(int i = 0; i< nbNode; i++){
       conn_info_temp.clear();
       splitString(conn_info_temp, nodeList[i], ':');
@@ -474,7 +482,8 @@ for(int i = 0; i< nbNode; i++){
 
 
     }
-    int k = 0;
+
+    k = 0;
     while(k<nbNode){
       if (waitpid(childtab[k], &wstatus, WUNTRACED | WCONTINUED) == -1) {
           perror("waitpid");
