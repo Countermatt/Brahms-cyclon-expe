@@ -50,6 +50,7 @@ RPS::RPS(int rpsTcpPort, std::string bootstrapIP, int nb_turn, int rps_period,
 
 
   mListenerThread = thread(&RPS::listeningThread, this);
+  std::this_thread::sleep_for(std::chrono::milliseconds(1000 * mRPSPeriod));
   mSenderThread = thread(&RPS::sendingThread, this);
 
 
