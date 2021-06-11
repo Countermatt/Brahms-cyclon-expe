@@ -35,14 +35,14 @@ public:
   void listeningThread();
 
   //pull request
-  void initPullRequest();
+  int initPullRequest();
 
   //push request
-  void pushRequest();
+  int pushRequest();
 
 
   void ReceiveRequest(shared_ptr<TCPConnection> conn);
-  void samplerRequest(int i);
+  int samplerRequest(int i);
   void samplerReply();
   void endRequest();
 

@@ -29,7 +29,8 @@ RPS::RPS(int rpsTcpPort, std::string bootstrapIP, int nb_turn, int rps_period,
     : mListener(make_shared<TCPListener>(rpsTcpPort)),
     mRpsTcpPort(rpsTcpPort), mPushReqCnt(0), mPullReqCnt(0),
     mPingReqCnt(0), mData(), mBrahms(), mNbTurn(nb_turn),
-    mRPSPeriod(rps_period), mSGX(sgx), mterminated(1), mByzantin(byzantin), mByzAttack(0)
+    mRPSPeriod(rps_period), mSGX(sgx), mterminated(1),
+    mByzantin(byzantin), mByzAttack(0)
 {
   mDataPath = path;
   stringstream ss;
@@ -64,10 +65,12 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
   auto al1 = mBrahms.AL1();
   auto bl2 = mBrahms.BL2();
   auto gl3 = mBrahms.GL3();
-
+  int maxAttempt = 3;
+  int attempt = 0;
+  int successAttempt = 0;
   int tour = 0;
   int samplersize = mBrahms.SamplerSize();
-    fstream file;
+  fstream file;
 
     file.open(mDataPath ,ios::out | ios::app);
     if (!file) {
@@ -84,7 +87,17 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
 
     if(al1 != 0){
       for(int i = 0; i < al1; i++){
-        RPS::pushRequest();
+        while((attempt < maxAttempt) && (successAttempt == 0)){
+          if(RPS::pushRequest()){
+            successAttempt = 1;
+          }
+          else{
+            attempt++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          }
+        }
+        successAttempt = 0;
+        attempt = 0;
       }
     }
 
@@ -92,19 +105,38 @@ void RPS::sendingThread()      // initiate RPS Request every RPS_SYNC_TIME
 
     if(bl2 != 0){
       for(int i = 0; i < bl2; i++){
-        RPS::initPullRequest();
+        while((attempt < maxAttempt) && (successAttempt == 0)){
+          if(RPS::initPullRequest()){
+            successAttempt = 1;
+          }
+          else{
+            attempt++;
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+          }
+        }
+        successAttempt = 0;
+        attempt = 0;
       }
     }
 
   ss << RED << "fin pull \n" << RESET << endl;
 
     for(int i = 0; i < samplersize; i++){
-      RPS::samplerRequest(i);
+      while((attempt < maxAttempt) && (successAttempt == 0)){
+        if(RPS::samplerRequest(i)){
+          successAttempt = 1;
+        }
+        else{
+          attempt++;
+          std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+      }
+      successAttempt = 0;
+      attempt = 0;
     }
 
   ss << RED << "fin sampler \n" << RESET << endl;
   LOG(ss.str().c_str());
-
   mBrahms.MergeView(al1, bl2, gl3, &mData);
 
   //write globalview to data.csv
@@ -156,7 +188,7 @@ void RPS::listeningThread()
   LOG(ss.str().c_str());
 }
 
-void RPS::pushRequest()
+int RPS::pushRequest()
 {
   stringstream ss;
 
@@ -169,24 +201,29 @@ void RPS::pushRequest()
 
   //Mise en place de la push request
   res = mBrahms.Push_Request(&req, &reqSize, &destIP, &destIPSize, &destPort, &mData);
-
+  int attempt = 0;
   if (res != 0) {
     ss << "Error creating Push-brahms_REQ " << endl;
     LOG(ss.str().c_str());
-    return;
+    return 1;
   }
 
   auto qIP = string(destIP, destIPSize);
   if (destIP != nullptr) delete[] destIP;
-
   shared_ptr<TCPConnection> conn;
-  try {
-    conn = TCPConnection::Dial(qIP, destPort);
-  } catch (exception& e) {
-    ss << "Error dialing " << qIP << ": " << e.what();
-    LOG(ss.str().c_str());
-    if (req != nullptr) delete[] req;
-    return;
+
+  while(attempt < 3){
+    try {
+      conn = TCPConnection::Dial(qIP, destPort);
+    } catch (exception& e) {
+      attempt++;
+      ss << "Error dialing " << qIP << ": " << e.what();
+      LOG(ss.str().c_str());
+      if(attempt == 2){
+        if (req != nullptr) delete[] req;
+        return 1;
+      }
+    }
   }
 
   try {
@@ -195,16 +232,16 @@ void RPS::pushRequest()
     ss << "Error sending Push-brahms_REQ " << endl;
     LOG(ss.str().c_str());
     if (req != nullptr) delete[] req;
-    return;
+    return 1;
   }
 
   ss << "Sent Push_REQ " << endl;
   ss.clear();
   ss.str("");
-
+  return 0;
 }
 
-void RPS::initPullRequest()
+int RPS::initPullRequest()
 {
   stringstream ss;
 
@@ -221,7 +258,7 @@ void RPS::initPullRequest()
   if (res != 0) {
     ss << "Error creating Pull-brahms_REQ" << endl;
     LOG(ss.str().c_str());
-    return;
+    return 1;
   }
   auto qIP = string(destIP, destIPSize);
   if (destIP != nullptr) delete[] destIP;
@@ -235,7 +272,7 @@ void RPS::initPullRequest()
     ss << "Error dialing " << qIP << ": " << e.what();
     LOG(ss.str().c_str());
     if (req != nullptr) delete[] req;
-    return;
+    return 1;
   }
 
 //envoi du pull init
@@ -245,7 +282,7 @@ void RPS::initPullRequest()
     ss << "Error sending Pull-init_REQ " << endl;
     LOG(ss.str().c_str());
     if (req != nullptr) delete[] req;
-    return;
+    return 1;
   }
 
   //Receive pull init Answer
@@ -258,7 +295,7 @@ void RPS::initPullRequest()
       LOG(ss.str().c_str());
       conn->Close();
       if (req != nullptr) delete[] req;
-      return;
+      return 1;
     }
     conn->Close();
 
@@ -283,7 +320,7 @@ void RPS::initPullRequest()
         ss << "Error dialing " << qIP << ": " << e.what();
         LOG(ss.str().c_str());
         if (req != nullptr) delete[] req;
-        return;
+        return 1;
       }
 
 
@@ -293,7 +330,7 @@ void RPS::initPullRequest()
         ss << "Error sending Pull-cyclon_REQ " << endl;
         LOG(ss.str().c_str());
         if (reqCyclon != nullptr) delete[] reqCyclon;
-        return;
+        return 1;
       }
 
       ss << "Sent Pull_init " << endl;
@@ -311,7 +348,7 @@ void RPS::initPullRequest()
         LOG(ss.str().c_str());
         connCyclon->Close();
         if (reqCyclon != nullptr) delete[] reqCyclon;
-        return;
+        return 1;
       }
       connCyclon->Close();
 
@@ -323,11 +360,10 @@ void RPS::initPullRequest()
         LOG(ss.str().c_str());
         if (ansCyclon != nullptr) delete[] ansCyclon;
         if (req != nullptr) delete[] req;
-        return;
+        return 1;
       }
       if (ansCyclon != nullptr) delete[] ansCyclon;
       if (reqCyclon != nullptr) delete[] reqCyclon;
-      return;
     }
 
     else {
@@ -345,7 +381,7 @@ void RPS::initPullRequest()
         ss << "Error dialing " << qIP << ": " << e.what();
         LOG(ss.str().c_str());
         if (req != nullptr) delete[] req;
-        return;
+        return 1;
       }
 
       try {
@@ -354,7 +390,7 @@ void RPS::initPullRequest()
         ss << "Error sending Pull-brahms_REQ " << endl;
         LOG(ss.str().c_str());
         if (reqBrahms != nullptr) delete[] reqBrahms;
-        return;
+        return 1;
       }
 
 
@@ -368,7 +404,7 @@ void RPS::initPullRequest()
         LOG(ss.str().c_str());
         connBrahms->Close();
         if (reqBrahms != nullptr) delete[] reqBrahms;
-        return;
+        return 1;
       }
       connBrahms->Close();
 
@@ -378,13 +414,12 @@ void RPS::initPullRequest()
       res = mBrahms.Pull_Receive_Reply(requestbrahms[2], &mData);
       if (ansBrahms != nullptr) delete[] ansBrahms;
       if (reqBrahms != nullptr) delete[] reqBrahms;
-      return;
       }
-      return;
+      return 0;
 
 }
 
-void RPS::samplerRequest(int i)
+int RPS::samplerRequest(int i)
 {
   mData.SamplerResize();
   auto streamview = mData.StreamView();
@@ -408,7 +443,7 @@ void RPS::samplerRequest(int i)
     if (res != 0) {
       ss << "Error creating Ping_REQ " << endl;
       LOG(ss.str().c_str());
-      return;
+      return 1;
     }
 
     auto qIP = string(destIP, destIPSize);
@@ -430,7 +465,7 @@ void RPS::samplerRequest(int i)
       ss << "Error sending Pull_REQ " << endl;
       LOG(ss.str().c_str());
       if (req != nullptr) delete[] req;
-      return;
+      return 1;
     }
 
     //Receive RPS Answer
@@ -454,7 +489,7 @@ void RPS::samplerRequest(int i)
       mData.SamplerAdd(mData.RandomElement(mData.StreamView()));
     }
   }
-
+  return 0;
 }
 
 void RPS::ReceiveRequest(shared_ptr<TCPConnection> conn)
@@ -636,6 +671,7 @@ void RPS::endRequest()
 
 }
 
-void RPS::setTerminated(int k){
+void RPS::setTerminated(int k)
+{
   mterminated = k;
 }
